@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>LawhaBI (staging)</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 44 44'%3E%3Crect x='1' y='1' width='42' height='42' rx='11' fill='%23101C3A'/%3E%3Cpath d='M30 8v19a8 8 0 0 1-8 8h-4a7 7 0 0 1-7-7v-3' fill='none' stroke='%23fff' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3Crect x='15.5' y='20' width='4' height='8' rx='1.3' fill='%232BD4A4'/%3E%3Crect x='22' y='14' width='4' height='14' rx='1.3' fill='%235B8CFF'/%3E%3C/svg%3E">
+<style>
+  :root { --ink:#101C3A; --ink2:#4A5677; --line:#D8DEEC; --bg:#0A1230; --card:#fff; --accent:#2F6BFF; --navy:#101C3A; --mint:#2BD4A4; }
+  @property --spin { syntax:'<angle>'; inherits:false; initial-value:0deg; }
+  * { box-sizing:border-box; }
+  html, body { height:100%; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.45 "Segoe UI", system-ui, -apple-system, Arial, sans-serif; overflow-x:hidden; }
+  /* the living background: slow colour clouds, a faint grid, drifting points of light */
+  .sky { position:fixed; inset:0; overflow:hidden; pointer-events:none; z-index:0; background:radial-gradient(1200px 700px at 18% 12%, #16296A 0, transparent 60%), #0A1230; }
+  .sky i { position:absolute; border-radius:50%; filter:blur(70px); opacity:.55; will-change:transform; }
+  .sky .a { width:560px; height:560px; left:-120px; top:-140px; background:#2F6BFF; animation:drift1 19s ease-in-out infinite alternate; }
+  .sky .b { width:460px; height:460px; left:34%; bottom:-200px; background:#2BD4A4; opacity:.34; animation:drift2 23s ease-in-out infinite alternate; }
+  .sky .c { width:520px; height:520px; right:-160px; top:8%; background:#7B4DFF; opacity:.36; animation:drift3 27s ease-in-out infinite alternate; }
+  .sky::after { content:''; position:absolute; inset:0; background-image:linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px); background-size:46px 46px;
+    -webkit-mask-image:radial-gradient(900px 620px at 30% 45%, #000 0, transparent 75%); mask-image:radial-gradient(900px 620px at 30% 45%, #000 0, transparent 75%); animation:gridmove 30s linear infinite; }
+  .sky b { position:absolute; width:3px; height:3px; border-radius:50%; background:#BFD3FF; opacity:0; animation:spark 9s linear infinite; }
+  @keyframes drift1 { to { transform:translate(140px, 110px) scale(1.18); } } @keyframes drift2 { to { transform:translate(-160px, -90px) scale(1.25); } } @keyframes drift3 { to { transform:translate(-110px, 130px) scale(.86); } }
+  @keyframes gridmove { to { background-position:46px 46px, 46px 46px; } }
+  @keyframes spark { 0% { transform:translateY(0); opacity:0; } 12% { opacity:.85; } 80% { opacity:.5; } 100% { transform:translateY(-240px); opacity:0; } }
+  .csplit { position:relative; z-index:1; min-height:100%; display:grid; grid-template-columns:minmax(0, 1fr) minmax(400px, 520px); }
+  .cside { color:#fff; padding:44px 30px 44px 64px; display:flex; flex-direction:column; justify-content:center; position:relative; min-width:0; }
+  .cside > * { animation:rise .8s cubic-bezier(.2,.7,.2,1) both; } .cside > h2 { animation-delay:.08s; } .cside > p { animation-delay:.16s; } .cside > .flow { animation-delay:.24s; } .cside > .stage { animation-delay:.34s; }
+  @keyframes rise { from { opacity:0; transform:translateY(22px); } to { opacity:1; transform:none; } }
+  .cside .clogo { display:flex; align-items:center; gap:13px; font-size:27px; font-weight:700; letter-spacing:.2px; } .cside .clogo em { font-style:normal; color:#7EA6FF; }
+  .clogo svg { filter:drop-shadow(0 8px 22px rgba(47,107,255,.55)); } .clogo svg path { stroke-dasharray:70; stroke-dashoffset:70; animation:draw 1.3s .25s ease-out forwards; }
+  .clogo svg rect.lb { transform-box:fill-box; transform-origin:50% 100%; transform:scaleY(0); animation:growy .6s 1.1s cubic-bezier(.2,.9,.3,1.3) forwards; } .clogo svg rect.lb + rect.lb { animation-delay:1.25s; }
+  @keyframes draw { to { stroke-dashoffset:0; } } @keyframes growy { to { transform:scaleY(1); } }
+  .cside h2 { font-size:clamp(30px, 3.5vw, 50px); line-height:1.08; margin:26px 0 12px; font-weight:800; letter-spacing:-.8px; max-width:640px; }
+  .cside h2 em { font-style:normal; background:linear-gradient(100deg, #2BD4A4 0, #7EE8FF 30%, #7EA6FF 55%, #2BD4A4 100%); background-size:220% 100%; -webkit-background-clip:text; background-clip:text; color:transparent; animation:shine 5s linear infinite; }
+  @keyframes shine { to { background-position:-220% 0; } }
+  .cside p { color:#B9C4E4; font-size:16.5px; line-height:1.55; max-width:520px; margin:0 0 20px; }
+  /* the four steps, lit one after the other */
+  .flow { display:flex; align-items:center; flex-wrap:wrap; gap:6px 0; margin:0 0 26px; padding:0; list-style:none; }
+  .flow li { display:flex; align-items:center; font-size:13.5px; font-weight:600; color:#8FA0CC; }
+  .flow li span { padding:6px 13px; border-radius:999px; border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.05); animation:lit 8s infinite; }
+  .flow li + li::before { content:''; width:26px; height:2px; margin:0 6px; border-radius:2px; background:linear-gradient(90deg, rgba(255,255,255,.12), rgba(255,255,255,.3)); }
+  .flow li:nth-child(2) span { animation-delay:2s; } .flow li:nth-child(3) span { animation-delay:4s; } .flow li:nth-child(4) span { animation-delay:6s; }
+  @keyframes lit { 0%, 26%, 100% { color:#8FA0CC; background:rgba(255,255,255,.05); border-color:rgba(255,255,255,.14); box-shadow:none; } 4%, 20% { color:#fff; background:rgba(47,107,255,.85); border-color:#7EA6FF; box-shadow:0 0 0 5px rgba(47,107,255,.18), 0 8px 26px rgba(47,107,255,.5); } }
+  /* a dashboard that builds itself, in glass, tilting with the pointer */
+  .stage { position:relative; max-width:640px; perspective:1400px; }
+  .dash { position:relative; border-radius:18px; padding:14px 16px 16px; background:linear-gradient(160deg, rgba(255,255,255,.13), rgba(255,255,255,.05)); border:1px solid rgba(255,255,255,.18); box-shadow:0 30px 80px rgba(3,8,30,.6), inset 0 1px 0 rgba(255,255,255,.2);
+    -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); transform:rotateY(-7deg) rotateX(4deg); transform-style:preserve-3d; transition:transform .35s ease-out, opacity .4s; }
+  .dash.out { opacity:.25; }
+  .d-top { display:flex; align-items:center; gap:6px; margin-bottom:12px; font-size:13px; color:#DCE3F7; } .d-top u { width:9px; height:9px; border-radius:50%; background:rgba(255,255,255,.25); } .d-top b { margin-left:8px; font-weight:600; }
+  .d-top s { margin-left:auto; text-decoration:none; font-size:11px; padding:2px 9px; border-radius:999px; background:rgba(43,212,164,.16); color:#7FE9C8; border:1px solid rgba(43,212,164,.35); }
+  .d-kpis { display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-bottom:10px; }
+  .k, .c { background:rgba(10,18,48,.55); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:11px 13px; }
+  .k { opacity:0; transform:translateY(14px); } .go .k { animation:rise .6s cubic-bezier(.2,.7,.2,1) forwards; } .go .k:nth-child(2) { animation-delay:.12s; } .go .k:nth-child(3) { animation-delay:.24s; }
+  .k small, .c small { display:block; font-size:11.5px; color:#9FB0DA; letter-spacing:.2px; } .k strong { display:block; font-size:26px; font-weight:700; color:#fff; line-height:1.25; font-variant-numeric:tabular-nums; }
+  .k em { font-style:normal; font-size:12px; font-weight:600; color:#4FE3B6; } .k .bar { height:6px; border-radius:6px; background:rgba(255,255,255,.12); margin-top:7px; overflow:hidden; }
+  .k .bar i { display:block; height:100%; width:0; border-radius:6px; background:linear-gradient(90deg, #2F6BFF, #2BD4A4); } .go .k .bar i { animation:fill 1.5s .5s cubic-bezier(.2,.7,.2,1) forwards; } @keyframes fill { to { width:93%; } }
+  .d-row { display:grid; grid-template-columns:1.7fr 1fr; gap:10px; } .c { opacity:0; } .go .c { animation:rise .6s .36s cubic-bezier(.2,.7,.2,1) forwards; } .go .c + .c { animation-delay:.48s; }
+  .c svg { display:block; width:100%; height:auto; margin-top:6px; overflow:visible; }
+  .c .ln { fill:none; stroke:url(#lg); stroke-width:3; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:420; stroke-dashoffset:420; } .go .c .ln { animation:draw 2s .8s ease-out forwards; }
+  .c .ly { fill:none; stroke:rgba(255,255,255,.28); stroke-width:1.5; stroke-dasharray:4 5; opacity:0; } .go .c .ly { animation:fade .8s 1.2s forwards; }
+  .c .ar { fill:url(#ag); opacity:0; } .go .c .ar { animation:fade 1.2s 2s forwards; } @keyframes fade { to { opacity:1; } }
+  .c .pt { fill:#fff; opacity:0; } .go .c .pt { animation:fade .3s 2.7s forwards; } .c .ring { fill:none; stroke:#2BD4A4; stroke-width:2; opacity:0; transform-box:fill-box; transform-origin:center; } .go .c .ring { animation:ping 1.8s 2.8s ease-out infinite; }
+  @keyframes ping { 0% { opacity:.9; transform:scale(.6); } 100% { opacity:0; transform:scale(2.6); } }
+  .bars { display:grid; gap:7px; margin-top:9px; } .bars div { display:grid; grid-template-columns:44px 1fr; align-items:center; gap:8px; font-size:11px; color:#B9C4E4; }
+  .bars i { display:block; height:10px; border-radius:6px; background:linear-gradient(90deg, #2F6BFF, #7EA6FF); transform-origin:0 50%; transform:scaleX(0); } .bars div:first-child i { background:linear-gradient(90deg, #2BD4A4, #7EE8FF); }
+  .go .bars i { animation:growx .9s cubic-bezier(.2,.8,.2,1) forwards; } .go .bars div:nth-child(1) i { animation-delay:.9s; } .go .bars div:nth-child(2) i { animation-delay:1.02s; } .go .bars div:nth-child(3) i { animation-delay:1.14s; } .go .bars div:nth-child(4) i { animation-delay:1.26s; } .go .bars div:nth-child(5) i { animation-delay:1.38s; }
+  @keyframes growx { to { transform:scaleX(1); } }
+  .tag { position:absolute; display:flex; align-items:center; gap:8px; padding:9px 14px; border-radius:12px; font-size:13px; font-weight:600; color:#0B1430; background:#fff; box-shadow:0 16px 40px rgba(3,8,30,.5); opacity:0; transform:translateZ(60px) scale(.7); }
+  .tag i { width:20px; height:20px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-style:normal; font-size:12px; color:#fff; background:#16B88A; }
+  .tag.t1 { right:-22px; top:-18px; } .tag.t2 { left:-26px; bottom:-20px; } .tag.t2 i { background:#2F6BFF; }
+  .go .tag { animation:pop .5s cubic-bezier(.2,.9,.3,1.4) forwards, bob 5s ease-in-out infinite; } .go .tag.t1 { animation-delay:3.1s, 3.6s; } .go .tag.t2 { animation-delay:3.9s, 4.4s; }
+  @keyframes pop { to { opacity:1; transform:translateZ(60px) scale(1); } } @keyframes bob { 0%, 100% { margin-top:0; } 50% { margin-top:-8px; } }
+  /* the sign-in card: a border of moving light, fields that glow, a button with a passing shine */
+  .cmain { display:flex; align-items:center; justify-content:center; padding:40px 44px 40px 16px; }
+  .cwrap { position:relative; width:100%; max-width:440px; border-radius:20px; padding:2px; animation:rise .8s .2s cubic-bezier(.2,.7,.2,1) both; background:conic-gradient(from var(--spin), #2F6BFF, #2BD4A4, #7B4DFF, #2F6BFF); box-shadow:0 30px 90px rgba(3,8,30,.65), 0 0 70px rgba(47,107,255,.28); }
+  .cwrap { animation:rise .8s .2s cubic-bezier(.2,.7,.2,1) both, spin 7s linear infinite; } @keyframes spin { to { --spin:360deg; } }
+  .cbox { width:100%; margin:0; background:var(--card); border-radius:18px; padding:32px 34px 30px; }
+  h1 { margin:0; font-size:25px; color:var(--navy); letter-spacing:-.3px; } .csub { margin:4px 0 18px; color:var(--ink2); }
+  label { display:block; margin:0 0 13px; font-size:13.5px; font-weight:600; }
+  input[type=text], input[type=email], input[type=password] { display:block; width:100%; margin-top:5px; padding:11px 12px; font-size:15px; border:1px solid var(--line); border-radius:10px; background:#F8FAFF; color:var(--ink); transition:border-color .2s, box-shadow .2s, background .2s; }
+  input[type=text]:focus, input[type=email]:focus, input[type=password]:focus { outline:none; border-color:var(--accent); background:#fff; box-shadow:0 0 0 4px rgba(47,107,255,.16); }
+  .ctick { display:flex; gap:8px; align-items:flex-start; font-weight:400; } .ctick input { margin-top:3px; accent-color:var(--accent); }
+  button { font:inherit; padding:9px 14px; border-radius:10px; border:1px solid var(--line); background:#fff; color:var(--ink); cursor:pointer; }
+  button.primary { position:relative; overflow:hidden; background:linear-gradient(100deg, #2F6BFF, #1F57E0 55%, #5B3DF0); border:0; color:#fff; font-weight:600; box-shadow:0 10px 26px rgba(47,107,255,.4); transition:transform .15s, box-shadow .2s; } button[disabled] { opacity:.6; cursor:default; }
+  button.primary::after { content:''; position:absolute; top:0; bottom:0; left:-60%; width:45%; transform:skewX(-20deg); background:linear-gradient(90deg, transparent, rgba(255,255,255,.45), transparent); animation:sweep 3.6s ease-in-out infinite; }
+  @keyframes sweep { 0%, 55% { left:-60%; } 100% { left:130%; } }
+  button.primary:hover { transform:translateY(-1px); box-shadow:0 14px 34px rgba(47,107,255,.55); } button.primary:active { transform:translateY(0); }
+  form button[type=submit] { width:100%; padding:12px; font-size:15.5px; margin-top:4px; }
+  @media (max-width:1040px) { .csplit { grid-template-columns:1fr; } .cside { padding:28px 24px 6px; justify-content:flex-start; } .cside h2 { margin:18px 0 8px; } .stage, .flow { display:none; } .cside p { margin-bottom:0; } .cmain { padding:22px 16px 44px; align-items:flex-start; } }
+  @media (max-height:720px) and (min-width:1041px) { .cside { padding-top:24px; padding-bottom:24px; } .cside h2 { font-size:34px; margin-top:16px; } .flow { margin-bottom:18px; } .k strong { font-size:22px; } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation:none !important; transition:none !important; } .k, .c, .tag, .c .ly, .c .ar, .c .pt { opacity:1; transform:none; } .bars i { transform:none; } .k .bar i { width:93%; } .c .ln, .clogo svg path { stroke-dashoffset:0; } .clogo svg rect.lb { transform:none; } .tag { transform:translateZ(60px); } }
+  button.link { background:none; border:0; padding:0; color:var(--accent); font-weight:600; text-decoration:underline; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
+  .cswitch { margin:14px 0 0; font-size:14px; color:var(--ink2); } .small { font-size:13px; color:var(--ink2); margin:10px 0 0; }
+  .cmsg { margin:0 0 14px; padding:9px 12px; border-radius:7px; background:#fde8e8; color:#8a1c1c; font-size:14px; } .cmsg.ok { background:#e6f4ea; color:#1e5c2e; }
+  .cnote { margin:18px 0 0; padding:12px 14px; border-radius:8px; background:#f3f5f8; font-size:12.5px; color:var(--ink2); } .cnote ul { margin:6px 0 0; padding-left:18px; } .cnote li { margin:3px 0; }
+</style>
+</head>
+<body>
+<div class="sky" aria-hidden="true"><i class="a"></i><i class="b"></i><i class="c"></i>
+  <b style="left:8%;top:78%"></b><b style="left:21%;top:92%;animation-delay:2.2s"></b><b style="left:37%;top:84%;animation-delay:4.1s"></b><b style="left:52%;top:95%;animation-delay:1.3s"></b><b style="left:66%;top:80%;animation-delay:5.6s"></b><b style="left:79%;top:90%;animation-delay:3.2s"></b><b style="left:91%;top:83%;animation-delay:6.8s"></b></div>
+<div class="csplit">
+  <aside class="cside">
+    <div class="clogo"><svg width="50" height="50" viewBox="0 0 44 44" role="img" aria-label="LawhaBI"><rect x="1" y="1" width="42" height="42" rx="11" fill="#2F6BFF"/><path d="M30 8v19a8 8 0 0 1-8 8h-4a7 7 0 0 1-7-7v-3" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><rect class="lb" x="15.5" y="20" width="4" height="8" rx="1.3" fill="#2BD4A4"/><rect class="lb" x="22" y="14" width="4" height="14" rx="1.3" fill="#BFD3FF"/></svg><span>Lawha<em>BI</em></span></div>
+    <h2>Agree the dashboard <em>before</em> you build it.</h2>
+    <p>From the client's meeting to an interactive mockup they can approve, in one place.</p>
+    <ol class="flow"><li><span>Workshop</span></li><li><span>Dashboards</span></li><li><span>Mockup</span></li><li><span>Deliver</span></li></ol>
+    <div class="stage" aria-hidden="true"><div class="dash" id="dash">
+      <div class="d-top"><u></u><u></u><u></u><b>Sales Performance</b><s>Sample figures</s></div>
+      <div class="d-kpis">
+        <div class="k"><small>Net sales</small><strong data-n="4.82" data-d="2" data-s="M">4.82M</strong><em>▲ 8.4% on last year</em></div>
+        <div class="k"><small>Target reached</small><strong data-n="93" data-d="0" data-s="%">93%</strong><div class="bar"><i></i></div></div>
+        <div class="k"><small>On-time delivery</small><strong data-n="96.2" data-d="1" data-s="%">96.2%</strong><em>▲ 1.1 points</em></div>
+      </div>
+      <div class="d-row">
+        <div class="c"><small>Net sales by month</small>
+          <svg viewBox="0 0 300 96"><defs><linearGradient id="lg" x1="0" x2="1"><stop offset="0" stop-color="#2F6BFF"/><stop offset="1" stop-color="#2BD4A4"/></linearGradient><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2F6BFF" stop-opacity=".38"/><stop offset="1" stop-color="#2F6BFF" stop-opacity="0"/></linearGradient></defs>
+            <path class="ar" d="M4 74 L32 66 L60 70 L88 54 L116 58 L144 44 L172 48 L200 34 L228 38 L256 22 L290 12 L290 92 L4 92 Z"/>
+            <path class="ly" d="M4 80 L32 76 L60 78 L88 68 L116 70 L144 60 L172 62 L200 52 L228 54 L256 44 L290 38"/>
+            <path class="ln" d="M4 74 L32 66 L60 70 L88 54 L116 58 L144 44 L172 48 L200 34 L228 38 L256 22 L290 12"/>
+            <circle class="ring" cx="290" cy="12" r="6"/><circle class="pt" cx="290" cy="12" r="4"/></svg></div>
+        <div class="c"><small>By region</small><div class="bars"><div>North<i style="width:96%"></i></div><div>Centre<i style="width:78%"></i></div><div>East<i style="width:64%"></i></div><div>South<i style="width:47%"></i></div><div>West<i style="width:33%"></i></div></div></div>
+      </div>
+      <div class="tag t1"><i>✓</i>Approved by the client</div>
+      <div class="tag t2"><i>3</i>dashboards found in your notes</div>
+    </div></div>
+  </aside>
+  <div class="cmain"><div class="cwrap"><div class="cbox" id="box"><h1>LawhaBI</h1><p class="csub">One moment…</p></div></div></div>
+</div>
+<noscript><p style="text-align:center">This tool needs JavaScript.</p></noscript>
+<script>
+/* The picture on the left: the sample dashboard builds itself again every few seconds, its numbers count up, and it leans a little towards the pointer. Decoration only. */
+(function () {
+  var dash = document.getElementById('dash'); if (!dash) return;
+  var calm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches, nums = dash.querySelectorAll('[data-n]');
+  function count() { var t0 = null;
+    function step(t) { if (t0 === null) t0 = t; var p = Math.min(1, (t - t0) / 1500), e = 1 - Math.pow(1 - p, 3);
+      Array.prototype.forEach.call(nums, function (n) { n.textContent = (+n.getAttribute('data-n') * e).toFixed(+n.getAttribute('data-d')) + n.getAttribute('data-s'); });
+      if (p < 1) requestAnimationFrame(step); }
+    requestAnimationFrame(step); }
+  function play() { dash.classList.remove('go'); void dash.offsetWidth; dash.classList.remove('out'); dash.classList.add('go'); if (!calm) count(); }
+  play();
+  if (calm) return;
+  setInterval(function () { if (document.hidden) return; dash.classList.add('out'); setTimeout(play, 450); }, 11000);
+  document.addEventListener('mousemove', function (ev) { var x = ev.clientX / window.innerWidth - .5, y = ev.clientY / window.innerHeight - .5;
+    dash.style.transform = 'rotateY(' + (-7 + x * 9).toFixed(2) + 'deg) rotateX(' + (4 - y * 7).toFixed(2) + 'deg)'; });
+})();
+</script>
+<script>
+// The public sign-in page of the LawhaBI web edition. It holds no rule and no text of the tool: after a sign-in by
+// an approved account it asks the server for the tool and puts it in place of itself. The session it keeps in the browser is the
+// one the tool then uses.
+(function () {
+  'use strict';
+  var CLOUD = { url: "https://lulfkmiabixcbznwginl.supabase.co", key: "sb_publishable__IorC4tAimE95Jh3FVeBww_5gMPy-XO", domains: [] };   /*CLOUD-CONFIG*/
+  var CSESS = 'bi-builder.cloud.session', S = { view: 'loading', msg: '', good: false, busy: false, email: '', name: '', session: null };
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function req(path, body, token) {
+    var hd = { 'Content-Type': 'application/json', apikey: CLOUD.key }; if (token) hd.Authorization = 'Bearer ' + token;
+    return fetch(CLOUD.url + path, { method: 'POST', headers: hd, body: JSON.stringify(body || {}) }).then(function (r) {
+      return r.text().then(function (t) { var d = null; try { d = t ? JSON.parse(t) : null; } catch (e) {} return { ok: r.ok, status: r.status, data: d, text: t }; });
+    }, function () { return { ok: false, status: 0, data: null, text: '' }; });
+  }
+  var MSG = {
+    offline: 'No connection to the server. Check the internet connection and try again.',
+    invalid_credentials: 'The e-mail address or the password is not right.',
+    user_already_exists: 'An account with this e-mail address already exists. Sign in instead.',
+    weak_password: 'Choose a longer password (8 characters or more).',
+    unexpected_failure: 'The account could not be created. Only company e-mail addresses can have an account.',
+    signup_domain_not_allowed: 'Only company e-mail addresses can have an account.',
+    email_not_confirmed: 'This account is not switched on yet. Ask the administrator of the tool.',
+    signup_disabled: 'New accounts are closed for the moment.',
+    over_request_rate_limit: 'Too many tries. Wait a few minutes and try again.'
+  };
+  function say(x) { var d = x.data || {}, c = x.status === 0 ? 'offline' : String(d.error_code || d.message || d.msg || d.error || ('error ' + x.status)); return MSG[c] || 'Something went wrong (' + c.slice(0, 80) + '). Try again.'; }
+  function keep(s) { S.session = s; try { if (s) localStorage.setItem(CSESS, JSON.stringify(s)); else localStorage.removeItem(CSESS); } catch (e) {} }
+  function take(d) { if (!d || !d.access_token) return false; var o = S.session || {}; keep({ at: d.access_token, rt: d.refresh_token, exp: Date.now() + (+d.expires_in || 3600) * 1000, user: d.user ? d.user.id : o.user, email: d.user ? d.user.email : o.email }); return true; }
+  function token() {
+    var s = S.session; if (!s) return Promise.resolve('');
+    if (s.exp - Date.now() > 60000) return Promise.resolve(s.at);
+    return req('/auth/v1/token?grant_type=refresh_token', { refresh_token: s.rt }).then(function (x) { if (x.ok && take(x.data)) return S.session.at; if (x.status === 0) return s.at; keep(null); return ''; });
+  }
+  var NOTE = '<div class="cnote"><b>What is stored and who sees it</b><ul>' +
+    '<li><b>Your account:</b> your company e-mail address, your name, when you signed up and when you last used the tool.</li>' +
+    '<li><b>Your projects:</b> everything you enter is saved in the tool\'s database so you can find it again. Other users cannot see your projects.</li>' +
+    '<li><b>How you use the tool:</b> actions such as opening a project or generating a mockup are recorded with the time, to improve the tool.</li>' +
+    '<li><b>Claude:</b> the Claude buttons send the text the tool prepares to Anthropic\'s Claude service through the tool\'s server, never the client\'s name or logo. The number of requests and their cost are recorded per user; each user has a monthly budget.</li>' +
+    '<li><b>Who can see this:</b> only the administrator of the tool. Nothing is sold or shared.</li>' +
+    '<li><b>During the beta:</b> use fictional or approved client information only. The service is free and comes without guarantee; export your projects to a file regularly.</li>' +
+    '<li><b>The tool belongs to its author.</b> It is for your work in the company; do not copy it or pass it on.</li></ul></div>';
+  function draw() {
+    var v = S.view, msg = S.msg ? '<p class="cmsg' + (S.good ? ' ok' : '') + '" role="alert">' + esc(S.msg) + '</p>' : '', dis = S.busy ? ' disabled' : '',
+      h = '<h1>' + (v === 'signin' ? 'Welcome back' : v === 'signup' ? 'Get started' : v === 'waiting' ? 'Almost there' : 'LawhaBI') + '</h1>';
+    if (v === 'signin' || v === 'signup') { var up = v === 'signup';
+      h = '<form id="f" data-kind="' + v + '" novalidate>' + h + '<p class="csub">' + (up ? 'Create your account' : 'Sign in to your projects') + '</p>' + msg +
+        (up ? '<label>Your name<input type="text" id="cName" autocomplete="name" maxlength="120" value="' + esc(S.name) + '"></label>' : '') +
+        '<label>Company e-mail address<input type="email" id="cEmail" autocomplete="username" value="' + esc(S.email) + '"></label>' +
+        '<label>Password' + (up ? ' (8 characters or more)' : '') + '<input type="password" id="cPass" autocomplete="' + (up ? 'new-password' : 'current-password') + '"></label>' +
+        (up ? '<label>Confirm password<input type="password" id="cPass2" autocomplete="new-password"></label>' : '') +
+        (up ? '<label class="ctick"><input type="checkbox" id="cTerms"><span>I have read the note below and I accept it.</span></label>' : '') +
+        '<button type="submit" class="primary"' + dis + '>' + (S.busy ? 'One moment…' : up ? 'Create account' : 'Sign in') + '</button>' +
+        '<p class="cswitch">' + (up ? 'Already have an account? <button type="button" class="link" data-go="signin">Sign in</button>' : 'No account yet? <button type="button" class="link" data-go="signup">Create one</button>') + '</p>' +
+        (up ? NOTE : '<p class="small">Forgotten your password? Ask the administrator of the tool to reset it.</p>') + '</form>';
+    } else if (v === 'waiting') {
+      h += '<p class="csub">Your account is waiting for approval</p>' + msg + '<p>The account <b>' + esc((S.session && S.session.email) || '') + '</b> was created. The administrator of the tool has to approve it before you can use it. Come back later, or click below once you are told it is done.</p>' +
+        '<div class="row"><button type="button" class="primary" data-go="check"' + dis + '>' + (S.busy ? 'Checking…' : 'Check again') + '</button><button type="button" data-go="signout">Sign out</button></div>';
+    } else if (v === 'failed') {
+      h += '<p class="csub">The tool could not be opened</p>' + msg + '<div class="row"><button type="button" class="primary" data-go="check">Try again</button><button type="button" data-go="signout">Sign out</button></div>';
+    } else h += '<p class="csub">' + esc(S.msg || 'One moment…') + '</p>';
+    $('box').innerHTML = h;
+  }
+  function show(v, msg, good) { S.view = v; S.msg = msg || ''; S.good = !!good; S.busy = false; draw(); }
+  // signed in: is the account approved? then the tool is asked from the server and takes the place of this page
+  function enter() {
+    show('loading', 'Opening the tool…');
+    return token().then(function (t) {
+      if (!t) { show('signin', S.session ? MSG.offline : ''); return; }
+      return req('/rest/v1/rpc/my_profile', {}, t).then(function (p) {
+        if (!p.ok) { if (p.status === 0) { show('failed', MSG.offline); return; } keep(null); show('signin', p.status === 401 ? 'Please sign in again.' : say(p)); return; }
+        if (!p.data || p.data.approved !== true) { show('waiting'); return; }
+        return req('/functions/v1/app-staging', {}, t).then(function (a) {
+          if (a.status === 200 && /^\s*<!doctype html/i.test(a.text)) { document.open(); document.write(a.text); document.close(); return; }
+          if (a.status === 401) { keep(null); show('signin', 'Please sign in again.'); }
+          else if (a.status === 403) show('waiting');
+          else show('failed', a.status === 0 ? MSG.offline : 'The server did not send the tool (' + a.status + '). Try again in a minute.');
+        });
+      });
+    });
+  }
+  function submit(kind) {
+    if (S.busy) return;
+    var email = ($('cEmail').value || '').trim().toLowerCase(), pass = $('cPass').value || '', pass2 = $('cPass2') ? $('cPass2').value || '' : '', name = $('cName') ? ($('cName').value || '').trim() : '', up = kind === 'signup';
+    S.email = email; S.name = name;
+    var bad = !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) ? 'Enter your company e-mail address.' :
+      up && CLOUD.domains && CLOUD.domains.length && CLOUD.domains.indexOf(email.split('@')[1]) < 0 ? 'Only ' + CLOUD.domains.map(function (x) { return '@' + x; }).join(' or ') + ' addresses can create an account.' :
+      up && !name ? 'Enter your name.' : !pass ? 'Enter your password.' : up && pass.length < 8 ? MSG.weak_password : up && pass !== pass2 ? 'The two passwords are not the same. Type them again.' : up && !$('cTerms').checked ? 'Tick the box to accept the note below.' : '';
+    if (bad) { show(kind, bad); return; }
+    S.busy = true; S.msg = ''; draw();
+    req(up ? '/auth/v1/signup' : '/auth/v1/token?grant_type=password', up ? { email: email, password: pass, data: { full_name: name } } : { email: email, password: pass }).then(function (x) {
+      pass = ''; pass2 = '';
+      if (x.ok && take(x.data)) { try { sessionStorage.setItem('bi-builder.cloud.fresh', '1'); } catch (e) {} return enter(); }
+      if (x.ok) { show('signin', 'Your account was created. The administrator of the tool has to switch it on before you can sign in.', true); return; }
+      show(kind, say(x));
+    });
+  }
+  document.addEventListener('submit', function (ev) { if (ev.target && ev.target.id === 'f') { ev.preventDefault(); submit(ev.target.getAttribute('data-kind')); } });
+  document.addEventListener('click', function (ev) {
+    var b = ev.target.closest && ev.target.closest('[data-go]'); if (!b) return; var go = b.getAttribute('data-go');
+    if (go === 'signin' || go === 'signup') { S.email = $('cEmail') ? $('cEmail').value.trim() : S.email; show(go); }
+    else if (go === 'check') { S.busy = true; draw(); enter().then(function () { if (S.view === 'waiting') show('waiting', 'Not approved yet.'); }); }
+    else if (go === 'signout') { var s = S.session; if (s) req('/auth/v1/logout', {}, s.at); keep(null); show('signin'); }
+  });
+  if (!CLOUD.url || !CLOUD.key) { show('failed', 'This page was not built: run web-edition\\build.ps1.'); return; }
+  var s0 = null; try { s0 = JSON.parse(localStorage.getItem(CSESS) || 'null'); } catch (e) {}
+  S.session = s0 && s0.at && s0.rt ? s0 : null;
+  if (S.session) enter(); else show('signin');
+})();
+</script>
+<div style="position:fixed;left:0;right:0;bottom:0;z-index:99999;background:#b45309;color:#fff;font:600 12px/1.6 system-ui,sans-serif;text-align:center;pointer-events:none">STAGING: a test copy. Same accounts and projects as the real site.</div></body>
+</html>
