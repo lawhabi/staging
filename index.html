@@ -154,8 +154,8 @@
 // one the tool then uses.
 (function () {
   'use strict';
-  var CLOUD = { url: "https://lulfkmiabixcbznwginl.supabase.co", key: "sb_publishable__IorC4tAimE95Jh3FVeBww_5gMPy-XO", domains: [] };   /*CLOUD-CONFIG*/
-  var CSESS = 'bi-builder.cloud.session', S = { view: 'loading', msg: '', good: false, busy: false, email: '', name: '', session: null };
+  var CLOUD = { url: "https://wpytfkmkbrlsvsbbossa.supabase.co", key: "sb_publishable_t6b24Ud4GD3OFIBYlIbg4g_9qYKYkBB", domains: [] };   /*CLOUD-CONFIG*/
+  var CSESS = 'bi-builder-staging.cloud.session', S = { view: 'loading', msg: '', good: false, busy: false, email: '', name: '', session: null };
   function $(id) { return document.getElementById(id); }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function req(path, body, token) {
@@ -241,7 +241,7 @@
     S.busy = true; S.msg = ''; draw();
     req(up ? '/auth/v1/signup' : '/auth/v1/token?grant_type=password', up ? { email: email, password: pass, data: { full_name: name } } : { email: email, password: pass }).then(function (x) {
       pass = ''; pass2 = '';
-      if (x.ok && take(x.data)) { try { sessionStorage.setItem('bi-builder.cloud.fresh', '1'); } catch (e) {} return enter(); }
+      if (x.ok && take(x.data)) { try { sessionStorage.setItem('bi-builder-staging.cloud.fresh', '1'); } catch (e) {} return enter(); }
       if (x.ok) { show('signin', 'Your account was created. The administrator of the tool has to switch it on before you can sign in.', true); return; }
       show(kind, say(x));
     });
@@ -259,5 +259,5 @@
   if (S.session) enter(); else show('signin');
 })();
 </script>
-<div style="position:fixed;left:0;right:0;bottom:0;z-index:99999;background:#b45309;color:#fff;font:600 12px/1.6 system-ui,sans-serif;text-align:center;pointer-events:none">STAGING: a test copy. Same accounts and projects as the real site.</div></body>
+<div style="position:fixed;left:0;right:0;bottom:0;z-index:99999;background:#b45309;color:#fff;font:600 12px/1.6 system-ui,sans-serif;text-align:center;pointer-events:none">STAGING: a test copy with its own accounts and projects, separate from the real site.</div></body>
 </html>
