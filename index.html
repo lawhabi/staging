@@ -185,17 +185,17 @@
   }
   var NOTE = '<div class="cnote"><b>What is stored and who sees it</b><ul>' +
     '<li><b>Your account:</b> your company e-mail address, your name, when you signed up and when you last used the tool.</li>' +
-    '<li><b>Your projects:</b> everything you enter is saved in the tool\'s database so you can find it again. Other users cannot see your projects.</li>' +
-    '<li><b>How you use the tool:</b> actions such as opening a project or generating a mockup are recorded with the time, to improve the tool.</li>' +
+    '<li><b>Your clients and workbooks:</b> everything you enter is saved in the tool\'s database so you can find it again. Other users cannot see your clients or workbooks.</li>' +
+    '<li><b>How you use the tool:</b> actions such as opening a workbook or generating a mockup are recorded with the time, to improve the tool.</li>' +
     '<li><b>Claude:</b> the Claude buttons send the text the tool prepares to Anthropic\'s Claude service through the tool\'s server, never the client\'s name or logo. The number of requests and their cost are recorded per user; each user has a monthly budget.</li>' +
     '<li><b>Who can see this:</b> only the administrator of the tool. Nothing is sold or shared.</li>' +
-    '<li><b>During the beta:</b> use fictional or approved client information only. The service is free and comes without guarantee; export your projects to a file regularly.</li>' +
+    '<li><b>During the beta:</b> use fictional or approved client information only. The service is free and comes without guarantee; export your workbooks to a file regularly.</li>' +
     '<li><b>The tool belongs to its author.</b> It is for your work in the company; do not copy it or pass it on.</li></ul></div>';
   function draw() {
     var v = S.view, msg = S.msg ? '<p class="cmsg' + (S.good ? ' ok' : '') + '" role="alert">' + esc(S.msg) + '</p>' : '', dis = S.busy ? ' disabled' : '',
       h = '<h1>' + (v === 'signin' ? 'Welcome back' : v === 'signup' ? 'Get started' : v === 'waiting' ? 'Almost there' : 'LawhaBI') + '</h1>';
     if (v === 'signin' || v === 'signup') { var up = v === 'signup';
-      h = '<form id="f" data-kind="' + v + '" novalidate>' + h + '<p class="csub">' + (up ? 'Create your account' : 'Sign in to your projects') + '</p>' + msg +
+      h = '<form id="f" data-kind="' + v + '" novalidate>' + h + '<p class="csub">' + (up ? 'Create your account' : 'Sign in to your clients and workbooks') + '</p>' + msg +
         (up ? '<label>Your name<input type="text" id="cName" autocomplete="name" maxlength="120" value="' + esc(S.name) + '"></label>' : '') +
         '<label>Company e-mail address<input type="email" id="cEmail" autocomplete="username" value="' + esc(S.email) + '"></label>' +
         '<label>Password' + (up ? ' (8 characters or more)' : '') + '<input type="password" id="cPass" autocomplete="' + (up ? 'new-password' : 'current-password') + '"></label>' +
