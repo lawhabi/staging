@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src https://*.supabase.co; frame-src blob: data:; base-uri 'none'; form-action 'none'">
+<title>Review: LawhaBI (staging)</title>
+<style>
+  :root { --ink:#1b2430; --muted:#55606d; --line:#d7dce2; --bg:#f4f5f7; --card:#fff; --brand:#2f6bff; --good:#1b7a3d; --bad:#b3261e; --warn:#9a6700; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.45 "Segoe UI", system-ui, -apple-system, Arial, sans-serif; color:var(--ink); background:var(--bg); }
+  header { display:flex; flex-wrap:wrap; gap:8px 16px; align-items:center; padding:10px 18px; background:var(--card); border-bottom:1px solid var(--line); }
+  header .mark { font-weight:700; font-size:16px; } header .mark em { color:var(--brand); font-style:normal; }
+  header h1 { font-size:16px; margin:0; flex:1 1 320px; } header .who { color:var(--muted); font-size:13px; }
+  .chip { display:inline-block; padding:2px 9px; border-radius:999px; font-size:12px; font-weight:600; background:#eef1f5; }
+  .chip.ok { background:#e3f4e8; color:var(--good); } .chip.warn { background:#fdf3d8; color:var(--warn); } .chip.bad { background:#fde7e5; color:var(--bad); }
+  .banner { padding:7px 18px; background:#fff8e6; border-bottom:1px solid #f0dca8; font-size:13px; }
+  main { display:grid; grid-template-columns:minmax(0, 1fr) 420px; gap:14px; padding:14px 18px; }
+  @media (max-width: 1000px) { main { grid-template-columns:1fr; } }
+  .frame { background:var(--card); border:1px solid var(--line); border-radius:10px; overflow:hidden; min-height:70vh; }
+  .frame iframe { width:100%; height:calc(100vh - 150px); min-height:600px; border:0; display:block; }
+  aside { display:flex; flex-direction:column; gap:12px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px 14px; }
+  .card h2 { font-size:15px; margin:0 0 8px; }
+  .tabs { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:8px; } .tabs button { border:1px solid var(--line); background:#fff; border-radius:999px; padding:3px 10px; font:inherit; font-size:12px; cursor:pointer; }
+  .tabs button.on { background:var(--ink); color:#fff; border-color:var(--ink); }
+  .pane { max-height:46vh; overflow:auto; } .item { border-top:1px solid var(--line); padding:7px 0; } .item:first-child { border-top:0; }
+  .item b { display:block; } .m { color:var(--muted); font-size:12.5px; } .f { font:12px Consolas, monospace; color:#2f5d8c; word-break:break-word; }
+  textarea, input[type=text] { width:100%; font:inherit; border:1px solid var(--line); border-radius:8px; padding:7px 9px; }
+  textarea { min-height:70px; resize:vertical; }
+  label { display:block; margin:6px 0 2px; font-size:12.5px; color:var(--muted); }
+  .row { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:8px; }
+  button.primary { background:var(--brand); color:#fff; border:0; border-radius:8px; padding:8px 14px; font:inherit; font-weight:600; cursor:pointer; }
+  button.plain { background:#fff; border:1px solid var(--line); border-radius:8px; padding:7px 12px; font:inherit; cursor:pointer; }
+  button:disabled { opacity:.55; cursor:default; }
+  .msg { margin-top:8px; font-size:13px; } .msg.bad { color:var(--bad); } .msg.good { color:var(--good); }
+  .center { max-width:560px; margin:12vh auto; text-align:center; } .center .card { padding:26px; }
+  dialog { border:1px solid var(--line); border-radius:12px; padding:16px; width:min(520px, 92vw); } dialog::backdrop { background:rgba(15,23,42,.4); }
+  .hash { font:11px Consolas, monospace; word-break:break-all; color:var(--muted); }
+</style>
+</head>
+<body>
+<div id="app"><div class="center"><div class="card"><p>Opening the review…</p></div></div></div>
+<dialog id="cmDlg"><h2 id="cmTitle" style="font-size:15px;margin:0 0 8px"></h2><textarea id="cmText" maxlength="2000" placeholder="Your comment"></textarea>
+  <div class="row"><button type="button" class="primary" id="cmSend">Send the comment</button><button type="button" class="plain" id="cmCancel">Cancel</button></div><div class="msg" id="cmMsg"></div></dialog>
+<script>
+(function () {
+  'use strict';
+  var CLOUD = { url: "https://wpytfkmkbrlsvsbbossa.supabase.co", key: "sb_publishable_t6b24Ud4GD3OFIBYlIbg4g_9qYKYkBB", domains: [] };   /*CLOUD-CONFIG*/
+  var FN = '/functions/v1/review-staging';
+  /* The review link's token is in the part of the address after "#": it never reaches the web host. It is sent only to the
+     server function above, which checks it. Everything shown here comes from that function and is inserted as text. */
+  var token = (/[#&]t=([A-Za-z0-9_-]{40,64})/.exec(location.hash) || [])[1] || '';
+  var R = null, comments = [], decision = null, tab = 'defs', item = null;
+  var $ = function (id) { return document.getElementById(id); };
+  function el(tag, attrs, kids) {
+    var e = document.createElement(tag);
+    Object.keys(attrs || {}).forEach(function (k) { if (k === 'text') e.textContent = attrs[k]; else if (k === 'cls') e.className = attrs[k]; else if (k.slice(0, 2) === 'on') e.addEventListener(k.slice(2), attrs[k]); else e.setAttribute(k, attrs[k]); });
+    (kids || []).forEach(function (c) { if (c) e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); });
+    return e;
+  }
+  function call(body) {
+    body.token = token;
+    return fetch(CLOUD.url + FN, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: CLOUD.key, Authorization: 'Bearer ' + CLOUD.key }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, data: d }; }, function () { return { ok: false, data: null }; }); }, function () { return { ok: false, data: null, offline: true }; });
+  }
+  function say(r) { return r.offline ? 'The page could not reach the server. Check the internet connection and try again.' : (r.data && r.data.error && r.data.error.message) || 'The server could not do this. Try again in a minute.'; }
+  function stop(text) { var a = $('app'); a.textContent = ''; a.appendChild(el('div', { cls: 'center' }, [el('div', { cls: 'card' }, [el('h1', { text: 'Review', style: 'font-size:18px;margin-top:0' }), el('p', { text: text })])])); }
+  function when(t) { var d = new Date(t); return isNaN(d) ? '' : d.toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }); }
+  var PART = { final: 'Final approval', review: 'Review', informed: 'Informed' };
+
+  function canDecide() { return R && R.link.purpose === 'approval' && R.link.part !== 'informed'; }
+  function render() {
+    var c = R.contract || {}, a = $('app'); a.textContent = '';
+    var st = decision ? el('span', { cls: 'chip ' + (decision.decision === 'approved' ? 'ok' : 'bad'), text: decision.decision === 'approved' ? 'You approved this version' : 'You requested changes' })
+      : el('span', { cls: 'chip ' + (R.link.purpose === 'approval' ? 'ok' : 'warn'), text: R.link.purpose === 'approval' ? 'For approval' : 'For comments only' });
+    a.appendChild(el('header', {}, [el('span', { cls: 'mark', text: 'LawhaBI' }), el('h1', { text: 'Review of ' + (c.workbook || 'the workbook') + ', version ' + R.version.number }), st,
+      el('span', { cls: 'who', text: 'For ' + R.link.reviewer_name + (R.link.reviewer_role ? ', ' + R.link.reviewer_role : '') + ' (' + PART[R.link.part] + ') · link valid until ' + when(R.link.expires_at) })]));
+    a.appendChild(el('div', { cls: 'banner', text: (R.link.purpose === 'comments' ? 'This version was sent for comments only: it did not pass every check yet, so it cannot be approved. ' : '') +
+      'The figures in the dashboards are invented sample data. What you review is the definitions, the layout and the exceptions. Click "Comment" on any KPI, chart or filter to leave a comment.' }));
+    var frame = el('iframe', { title: 'The mockup', sandbox: 'allow-scripts', referrerpolicy: 'no-referrer' }); frame.srcdoc = R.mockup_html;
+    var side = el('aside');
+    a.appendChild(el('main', {}, [el('div', { cls: 'frame' }, [frame]), side]));
+    /* the definitions and the rest of the contract */
+    var tabs = [['defs', 'Definitions (' + (c.kpis || []).length + ')'], ['exc', 'Exceptions (' + (c.exceptions || []).length + ')'], ['q', 'Questions (' + (c.questions || []).length + ')'], ['chg', 'What changed (' + (R.link.changes || []).length + ')'], ['brief', 'Purpose']];
+    var pane = el('div', { cls: 'pane' });
+    var tabBar = el('div', { cls: 'tabs' }, tabs.map(function (t) { return el('button', { type: 'button', cls: tab === t[0] ? 'on' : '', text: t[1], onclick: function () { tab = t[0]; render(); } }); }));
+    if (tab === 'defs') (c.kpis || []).forEach(function (k) { pane.appendChild(el('div', { cls: 'item' }, [el('b', { text: k.name + (k.unit ? ' (' + k.unit + ')' : '') }), k.meaning ? el('div', { text: k.meaning }) : null, el('div', { cls: 'm', text: 'Calculation: ' + k.calc }),
+      k.formula ? el('div', { cls: 'f', text: k.formula }) : null, (k.columns || []).some(function (x) { return x.mapped; }) ? el('div', { cls: 'm', text: 'Reads: ' + k.columns.map(function (x) { return x.column + (x.mapped ? ' → ' + x.mapped : ''); }).join(', ') }) : null, el('div', { cls: 'm', text: 'Stage: ' + k.stage })])); });
+    if (tab === 'exc') (c.exceptions || []).forEach(function (e) { pane.appendChild(el('div', { cls: 'item' }, [el('b', { text: e.where }), el('div', { text: e.values }), el('div', { cls: 'm', text: 'Why: ' + e.why })])); });
+    if (tab === 'q') (c.questions || []).forEach(function (q) { pane.appendChild(el('div', { cls: 'item' }, [el('b', { text: q.id + ' · ' + q.status }), el('div', { text: q.text }), el('div', { cls: 'm', text: (q.owner ? 'Who answers: ' + q.owner + ' · ' : '') + 'About: ' + q.blocks }), q.answer ? el('div', { cls: 'm', text: 'Answer: ' + q.answer }) : null])); });
+    if (tab === 'chg') { var ch = R.link.changes || []; if (!ch.length) pane.appendChild(el('p', { cls: 'm', text: 'This is the first version sent to you, or nothing you saw before has changed.' })); ch.forEach(function (x) { pane.appendChild(el('div', { cls: 'item', text: String(x) })); }); }
+    if (tab === 'brief') (c.brief || []).filter(function (b) { return b.value; }).forEach(function (b) { pane.appendChild(el('div', { cls: 'item' }, [el('b', { text: b.label }), el('div', { text: b.value })])); });
+    if (!pane.childNodes.length) pane.appendChild(el('p', { cls: 'm', text: 'Nothing here.' }));
+    side.appendChild(el('div', { cls: 'card' }, [el('h2', { text: 'What is agreed' }), tabBar, pane]));
+    /* the comments */
+    var list = el('div', { cls: 'pane', style: 'max-height:24vh' });
+    comments.forEach(function (x) { list.appendChild(el('div', { cls: 'item' }, [el('b', { text: [x.item_kind, x.item_name].filter(Boolean).join(': ') || 'The version' }), el('div', { text: x.text }), el('div', { cls: 'm', text: when(x.at) })])); });
+    if (!comments.length) list.appendChild(el('p', { cls: 'm', text: 'No comment yet. Click "Comment" on an item of the mockup, or write a general comment below.' }));
+    var gen = el('textarea', { id: 'genText', maxlength: '2000', placeholder: 'A general comment on this version' }), gmsg = el('div', { cls: 'msg' });
+    side.appendChild(el('div', { cls: 'card' }, [el('h2', { text: 'Your comments (' + comments.length + ')' }), list].concat(decision ? [] : [gen, el('div', { cls: 'row' }, [el('button', { type: 'button', cls: 'plain', text: 'Send the comment', onclick: function () { sendComment(null, gen.value, gmsg); } })]), gmsg])));
+    /* the decision */
+    var dc = el('div', { cls: 'card' }, [el('h2', { text: 'Your decision' })]);
+    if (decision) dc.appendChild(el('div', {}, [el('p', { text: (decision.decision === 'approved' ? 'Approved' : 'Changes requested') + ' by ' + decision.reviewer_name + (decision.reviewer_role ? ', ' + decision.reviewer_role : '') + ', ' + when(decision.at) + '.' }),
+      decision.comment ? el('p', { cls: 'm', text: decision.comment }) : null, el('p', { cls: 'm', text: 'A decision cannot be changed. The contract you decided on has this fingerprint (SHA-256):' }), el('div', { cls: 'hash', text: decision.contract_hash || R.contract_hash })]));
+    else if (!canDecide()) dc.appendChild(el('p', { cls: 'm', text: R.link.part === 'informed' ? 'You are informed of this version: you can read it and comment, and you give no decision.' : 'This version was sent for comments only: send your comments; a version for approval will follow.' }));
+    else {
+      var nm = el('input', { type: 'text', id: 'dName', maxlength: '200', value: R.link.reviewer_name }), rl = el('input', { type: 'text', id: 'dRole', maxlength: '200', value: R.link.reviewer_role || '' });
+      var ap = el('input', { type: 'radio', name: 'dec', value: 'approved', id: 'dA' }), cr = el('input', { type: 'radio', name: 'dec', value: 'changes_requested', id: 'dC' });
+      var cm = el('textarea', { id: 'dComment', maxlength: '4000', placeholder: 'A comment (needed to request changes, unless you commented on items)' }), rd = el('input', { type: 'checkbox', id: 'dRead' }), msg = el('div', { cls: 'msg' });
+      var go = el('button', { type: 'button', cls: 'primary', text: 'Send my decision', onclick: function () {
+        var d = ap.checked ? 'approved' : cr.checked ? 'changes_requested' : '';
+        if (!d) { msg.className = 'msg bad'; msg.textContent = 'Choose Approve or Request changes.'; return; }
+        go.disabled = true; msg.className = 'msg'; msg.textContent = 'Sending…';
+        call({ action: 'decide', decision: d, name: nm.value, role: rl.value, comment: cm.value, read: rd.checked }).then(function (r) {
+          go.disabled = false;
+          if (!r.ok || !r.data || r.data.error) { msg.className = 'msg bad'; msg.textContent = say(r); return; }
+          decision = { decision: d, reviewer_name: nm.value.trim(), reviewer_role: rl.value.trim(), comment: cm.value.trim(), at: new Date().toISOString(), contract_hash: r.data.contract_hash }; render();
+        }); } });
+      [el('label', { for: 'dName', text: 'Your name' }), nm, el('label', { for: 'dRole', text: 'Your role' }), rl,
+        el('div', { cls: 'row' }, [el('label', { style: 'margin:0;color:inherit' }, [ap, ' Approve this version']), el('label', { style: 'margin:0;color:inherit' }, [cr, ' Request changes'])]),
+        el('label', { for: 'dComment', text: 'Comment' }), cm, el('div', { cls: 'row' }, [el('label', { style: 'margin:0;color:inherit' }, [rd, ' I have read the definitions'])]),
+        el('div', { cls: 'row' }, [go]), msg, el('p', { cls: 'm', text: 'Your decision is recorded once, with your name, your role, the time and the fingerprint of the contract above. It cannot be changed afterwards.' })].forEach(function (x) { dc.appendChild(x); });
+    }
+    side.appendChild(dc);
+  }
+  function sendComment(it, text, msgEl) {
+    text = String(text || '').trim(); if (!text) { msgEl.className = 'msg bad'; msgEl.textContent = 'Write the comment first.'; return Promise.resolve(false); }
+    msgEl.className = 'msg'; msgEl.textContent = 'Sending…';
+    return call({ action: 'comment', item: it || {}, text: text }).then(function (r) {
+      if (!r.ok || !r.data || r.data.error) { msgEl.className = 'msg bad'; msgEl.textContent = say(r); return false; }
+      comments.push({ id: r.data.id, item_id: it ? it.id : '', item_kind: it ? it.kind : '', item_name: it ? it.name : '', dashboard: it ? it.dashboard : '', text: text, at: new Date().toISOString() });
+      render(); return true;
+    });
+  }
+  /* a Comment button in the mockup: the mockup (in its sandbox) only says which item; the text is typed here */
+  window.addEventListener('message', function (ev) {
+    var f = document.querySelector('.frame iframe'); if (!f || ev.source !== f.contentWindow) return;
+    var d = ev.data; if (!d || d.type !== 'mockup-comment' || !d.item || decision) return;
+    item = { id: String(d.item.id || '').slice(0, 80), kind: String(d.item.kind || '').slice(0, 20), name: String(d.item.name || '').slice(0, 200), dashboard: String(d.item.dashboard || '').slice(0, 200) };
+    $('cmTitle').textContent = 'Comment on ' + (item.kind ? item.kind.toLowerCase() + ' ' : '') + '"' + item.name + '"'; $('cmText').value = ''; $('cmMsg').textContent = ''; $('cmDlg').showModal(); $('cmText').focus();
+  });
+  $('cmCancel').addEventListener('click', function () { $('cmDlg').close(); });
+  $('cmSend').addEventListener('click', function () { sendComment(item, $('cmText').value, $('cmMsg')).then(function (ok) { if (ok) $('cmDlg').close(); }); });
+
+  if (!CLOUD.url || !CLOUD.key) { stop('This page is not set up yet.'); return; }
+  if (!token) { stop('This review link is not complete. Open the whole link you were sent, or ask the person who sent it for a new one.'); return; }
+  call({ action: 'open' }).then(function (r) {
+    if (!r.ok || !r.data || r.data.error) { stop(say(r)); return; }
+    R = r.data; comments = R.comments || []; decision = R.decision || null; render();
+  });
+})();
+</script>
+<div style="position:fixed;left:0;right:0;bottom:0;z-index:99999;background:#b45309;color:#fff;font:600 12px/1.6 system-ui,sans-serif;text-align:center;pointer-events:none">STAGING: a test copy with its own accounts and projects, separate from the real site.</div></body>
+</html>
