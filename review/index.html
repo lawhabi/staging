@@ -140,7 +140,7 @@
     var f = document.querySelector('.frame iframe'); if (!f || ev.source !== f.contentWindow) return;
     var d = ev.data; if (!d || d.type !== 'mockup-comment' || !d.item || decision) return;
     item = { id: String(d.item.id || '').slice(0, 80), kind: String(d.item.kind || '').slice(0, 20), name: String(d.item.name || '').slice(0, 200), dashboard: String(d.item.dashboard || '').slice(0, 200) };
-    $('cmTitle').textContent = 'Comment on ' + (item.kind ? item.kind.toLowerCase() + ' ' : '') + '"' + item.name + '"'; $('cmText').value = ''; $('cmMsg').textContent = ''; $('cmDlg').showModal(); $('cmText').focus();
+    $('cmTitle').textContent = 'Comment on ' + (item.kind ? (/^kpi$/i.test(item.kind) ? 'KPI' : item.kind.toLowerCase()) + ' ' : '') + '"' + item.name + '"'; $('cmText').value = ''; $('cmMsg').textContent = ''; $('cmDlg').showModal(); $('cmText').focus();
   });
   $('cmCancel').addEventListener('click', function () { $('cmDlg').close(); });
   $('cmSend').addEventListener('click', function () { sendComment(item, $('cmText').value, $('cmMsg')).then(function (ok) { if (ok) $('cmDlg').close(); }); });
