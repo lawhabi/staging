@@ -251,7 +251,7 @@
           if (a.status === 200 && /^\s*<!doctype html/i.test(a.text)) { document.open(); document.write(a.text); document.close(); return; }
           if (a.status === 401) { keep(null); show('signin', 'Please sign in again.'); }
           else if (a.status === 403) show('waiting');
-          else show('failed', a.status === 0 ? MSG.offline : 'The server did not send the tool (' + a.status + '). Try again in a minute.');
+          else show('failed', a.status === 0 ? MSG.offline : a.status === 429 ? MSG.too_many_requests : 'The server did not send the tool (' + a.status + '). Try again in a minute.');
         });
       });
     });
