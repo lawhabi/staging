@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src https://wpytfkmkbrlsvsbbossa.supabase.co; frame-src blob: data:; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title>LawhaBI (staging)</title>
@@ -153,6 +154,8 @@
 // an approved account it asks the server for the tool and puts it in place of itself. The session it keeps in the browser is the
 // one the tool then uses.
 (function () {
+  /* Sprint 25B: this page never works inside a frame of another page (a policy in a meta tag cannot say so, so the page does) */
+  if (window.top !== window.self) { document.documentElement.textContent = ''; return; }
   'use strict';
   var CLOUD = { url: "https://wpytfkmkbrlsvsbbossa.supabase.co", key: "sb_publishable_t6b24Ud4GD3OFIBYlIbg4g_9qYKYkBB", domains: [] };   /*CLOUD-CONFIG*/
   var CSESS = 'bi-builder-staging.cloud.session', S = { view: 'loading', msg: '', good: false, busy: false, email: '', name: '', session: null };
@@ -173,7 +176,8 @@
     signup_domain_not_allowed: 'Only company e-mail addresses can have an account.',
     email_not_confirmed: 'This account is not switched on yet. Ask the administrator of the tool.',
     signup_disabled: 'New accounts are closed for the moment.',
-    over_request_rate_limit: 'Too many tries. Wait a few minutes and try again.'
+    over_request_rate_limit: 'Too many tries. Wait a few minutes and try again.',
+    too_many_requests: 'Too many requests in a short time. Wait a minute and try again.'
   };
   function say(x) { var d = x.data || {}, c = x.status === 0 ? 'offline' : String(d.error_code || d.message || d.msg || d.error || ('error ' + x.status)); return MSG[c] || 'Something went wrong (' + c.slice(0, 80) + '). Try again.'; }
   function keep(s) { S.session = s; try { if (s) localStorage.setItem(CSESS, JSON.stringify(s)); else localStorage.removeItem(CSESS); } catch (e) {} }
