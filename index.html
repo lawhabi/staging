@@ -178,10 +178,17 @@
   function say(x) { var d = x.data || {}, c = x.status === 0 ? 'offline' : String(d.error_code || d.message || d.msg || d.error || ('error ' + x.status)); return MSG[c] || 'Something went wrong (' + c.slice(0, 80) + '). Try again.'; }
   function keep(s) { S.session = s; try { if (s) localStorage.setItem(CSESS, JSON.stringify(s)); else localStorage.removeItem(CSESS); } catch (e) {} }
   function take(d) { if (!d || !d.access_token) return false; var o = S.session || {}; keep({ at: d.access_token, rt: d.refresh_token, exp: Date.now() + (+d.expires_in || 3600) * 1000, user: d.user ? d.user.id : o.user, email: d.user ? d.user.email : o.email }); return true; }
+  /* the sign-in is kept until the server itself refuses to renew it: a server that is busy, or another tab that renewed it first, does not end it */
+  var WAIT = '-';
+  function stored() { try { var s = JSON.parse(localStorage.getItem(CSESS) || 'null'); return s && s.at && s.rt ? s : null; } catch (e) { return null; } }
   function token() {
     var s = S.session; if (!s) return Promise.resolve('');
     if (s.exp - Date.now() > 60000) return Promise.resolve(s.at);
-    return req('/auth/v1/token?grant_type=refresh_token', { refresh_token: s.rt }).then(function (x) { if (x.ok && take(x.data)) return S.session.at; if (x.status === 0) return s.at; keep(null); return ''; });
+    var o = stored(); if (o && o.rt !== s.rt && o.user === s.user && o.exp - Date.now() > 60000) { S.session = o; return Promise.resolve(o.at); }
+    return req('/auth/v1/token?grant_type=refresh_token', { refresh_token: s.rt }).then(function (x) {
+      if (x.ok && take(x.data)) return S.session.at;
+      if (x.status === 400 || x.status === 401 || x.status === 403) { var n = stored(); if (n && n.rt !== s.rt && n.user === s.user) { S.session = n; return n.at; } keep(null); return ''; }
+      return s.exp > Date.now() ? s.at : WAIT; });
   }
   var NOTE = '<div class="cnote"><b>What is stored and who sees it</b><ul>' +
     '<li><b>Your account:</b> your company e-mail address, your name, when you signed up and when you last used the tool.</li>' +
@@ -217,9 +224,10 @@
   function enter() {
     show('loading', 'Opening the tool…');
     return token().then(function (t) {
+      if (t === WAIT) { show('failed', MSG.offline); return; }
       if (!t) { show('signin', S.session ? MSG.offline : ''); return; }
       return req('/rest/v1/rpc/my_profile', {}, t).then(function (p) {
-        if (!p.ok) { if (p.status === 0) { show('failed', MSG.offline); return; } keep(null); show('signin', p.status === 401 ? 'Please sign in again.' : say(p)); return; }
+        if (!p.ok) { if (p.status === 0) { show('failed', MSG.offline); return; } if (p.status !== 401) { show('failed', say(p)); return; } keep(null); show('signin', 'Please sign in again.'); return; }
         if (!p.data || p.data.approved !== true) { show('waiting'); return; }
         return req('/functions/v1/app-staging', {}, t).then(function (a) {
           if (a.status === 200 && /^\s*<!doctype html/i.test(a.text)) { document.open(); document.write(a.text); document.close(); return; }
