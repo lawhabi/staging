@@ -158,9 +158,9 @@
   var CSESS = 'bi-builder-staging.cloud.session', S = { view: 'loading', msg: '', good: false, busy: false, email: '', name: '', session: null };
   function $(id) { return document.getElementById(id); }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
-  function req(path, body, token) {
+  function req(path, body, token, method) {
     var hd = { 'Content-Type': 'application/json', apikey: CLOUD.key }; if (token) hd.Authorization = 'Bearer ' + token;
-    return fetch(CLOUD.url + path, { method: 'POST', headers: hd, body: JSON.stringify(body || {}) }).then(function (r) {
+    return fetch(CLOUD.url + path, { method: method || 'POST', headers: hd, body: JSON.stringify(body || {}) }).then(function (r) {
       return r.text().then(function (t) { var d = null; try { d = t ? JSON.parse(t) : null; } catch (e) {} return { ok: r.ok, status: r.status, data: d, text: t }; });
     }, function () { return { ok: false, status: 0, data: null, text: '' }; });
   }
@@ -202,15 +202,25 @@
     var v = S.view, msg = S.msg ? '<p class="cmsg' + (S.good ? ' ok' : '') + '" role="alert">' + esc(S.msg) + '</p>' : '', dis = S.busy ? ' disabled' : '',
       h = '<h1>' + (v === 'signin' ? 'Welcome back' : v === 'signup' ? 'Get started' : v === 'waiting' ? 'Almost there' : 'LawhaBI') + '</h1>';
     if (v === 'signin' || v === 'signup') { var up = v === 'signup';
-      h = '<form id="f" data-kind="' + v + '" novalidate>' + h + '<p class="csub">' + (up ? 'Create your account' : 'Sign in to your clients and workbooks') + '</p>' + msg +
+      h = '<form id="f" data-kind="' + v + '" novalidate>' + h + '<p class="csub">' + (up ? 'Create your account' : S.inv ? 'Sign in to join ' + esc(S.inv.workspace) : 'Sign in to your clients and workbooks') + '</p>' + msg +
         (up ? '<label>Your name<input type="text" id="cName" autocomplete="name" maxlength="120" value="' + esc(S.name) + '"></label>' : '') +
         '<label>Company e-mail address<input type="email" id="cEmail" autocomplete="username" value="' + esc(S.email) + '"></label>' +
         '<label>Password' + (up ? ' (8 characters or more)' : '') + '<input type="password" id="cPass" autocomplete="' + (up ? 'new-password' : 'current-password') + '"></label>' +
         (up ? '<label>Confirm password<input type="password" id="cPass2" autocomplete="new-password"></label>' : '') +
         (up ? '<label class="ctick"><input type="checkbox" id="cTerms"><span>I have read the note below and I accept it.</span></label>' : '') +
         '<button type="submit" class="primary"' + dis + '>' + (S.busy ? 'One moment…' : up ? 'Create account' : 'Sign in') + '</button>' +
-        '<p class="cswitch">' + (up ? 'Already have an account? <button type="button" class="link" data-go="signin">Sign in</button>' : 'No account yet? <button type="button" class="link" data-go="signup">Create one</button>') + '</p>' +
-        (up ? NOTE : '<p class="small">Forgotten your password? Ask the administrator of the tool to reset it.</p>') + '</form>';
+        '<p class="cswitch">' + (up ? 'Already have an account? <button type="button" class="link" data-go="signin">Sign in</button>' : 'Accounts are by invitation: the owner of your workspace invites you by e-mail.') + '</p>' +
+        (up ? NOTE : '<p class="small"><button type="button" class="link" data-go="forgot">Forgotten password?</button></p>') + '</form>';
+    } else if (v === 'forgot' || v === 'newpass' || v === 'invite') {
+      var I = S.inv || {};   /* an invitation, a forgotten password, a new password: the same small form */
+      h = '<form id="f" data-kind="' + v + '" novalidate><h1>' + (v === 'forgot' ? 'Forgotten password' : v === 'newpass' ? 'A new password' : 'You are invited') + '</h1><p class="csub">' +
+        (v === 'forgot' ? 'A link to choose a new password is sent to your address' : v === 'newpass' ? 'Choose a new password for your account' : esc(I.by || 'A colleague') + ' invites you to ' + esc(I.workspace || '') + ', as ' + esc(I.role || '')) + '</p>' + msg +
+        (v === 'forgot' ? '<label>E-mail address<input type="email" id="cEmail" autocomplete="username" value="' + esc(S.email) + '"></label>' : '') +
+        (v === 'invite' ? '<p>Your account will be <b>' + esc(I.email || '') + '</b>.</p><label>Your name<input type="text" id="cName" autocomplete="name" maxlength="120" value="' + esc(S.name) + '"></label>' : '') +
+        (v !== 'forgot' ? '<label>Password (8 characters or more)<input type="password" id="cPass" autocomplete="new-password"></label><label>Confirm password<input type="password" id="cPass2" autocomplete="new-password"></label>' : '') +
+        (v === 'invite' ? '<label class="ctick"><input type="checkbox" id="cTerms"><span>I have read the note below and I accept it.</span></label>' : '') +
+        '<button type="submit" class="primary"' + dis + '>' + (S.busy ? 'One moment…' : v === 'forgot' ? 'Send the link' : v === 'newpass' ? 'Save the password' : 'Join') + '</button>' +
+        (v === 'newpass' ? '' : '<p class="cswitch"><button type="button" class="link" data-go="signin">Back to sign in</button></p>') + (v === 'invite' ? NOTE : '') + '</form>';
     } else if (v === 'waiting') {
       h += '<p class="csub">Your account is waiting for approval</p>' + msg + '<p>The account <b>' + esc((S.session && S.session.email) || '') + '</b> was created. The administrator of the tool has to approve it before you can use it. Come back later, or click below once you are told it is done.</p>' +
         '<div class="row"><button type="button" class="primary" data-go="check"' + dis + '>' + (S.busy ? 'Checking…' : 'Check again') + '</button><button type="button" data-go="signout">Sign out</button></div>';
@@ -221,7 +231,11 @@
   }
   function show(v, msg, good) { S.view = v; S.msg = msg || ''; S.good = !!good; S.busy = false; draw(); }
   // signed in: is the account approved? then the tool is asked from the server and takes the place of this page
+  function team(body, tok) { return req('/functions/v1/team-staging', body, tok); }
+  function tsay(x) { var e = x.data && x.data.error; return x.status === 0 ? MSG.offline : e && e.message ? String(e.message) : say(x); }
   function enter() {
+    if (S.inv && S.inv.has_account && S.session) { var I = S.inv; S.inv = null; show('loading', 'Joining ' + I.workspace + '…');
+      return token().then(function (t) { return team({ action: 'accept', token: I.token }, t); }).then(function (x) { if (!x.ok) { show('failed', tsay(x)); return; } return enter(); }); }
     show('loading', 'Opening the tool…');
     return token().then(function (t) {
       if (t === WAIT) { show('failed', MSG.offline); return; }
@@ -238,8 +252,49 @@
       });
     });
   }
+  /* a forgotten password (a link by e-mail), a new password (from that link), an invitation (a new account for the invited address) */
+  function more(kind) {
+    var pass = $('cPass') ? $('cPass').value || '' : '', pass2 = $('cPass2') ? $('cPass2').value || '' : '', I = S.inv || {};
+    if (kind === 'forgot') {
+      var em = ($('cEmail').value || '').trim().toLowerCase(); S.email = em;
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) { show(kind, 'Enter your e-mail address.'); return; }
+      S.busy = true; draw();
+      req('/auth/v1/recover?redirect_to=' + encodeURIComponent(location.origin + location.pathname), { email: em }).then(function (x) {
+        show('signin', x.status === 0 ? MSG.offline : x.status === 429 ? MSG.over_request_rate_limit : 'If this address has an account, a link to choose a new password is on its way. It works once.', x.status !== 0 && x.status !== 429); });
+      return;
+    }
+    S.name = $('cName') ? ($('cName').value || '').trim() : '';
+    var bad = kind === 'invite' && !S.name ? 'Enter your name.' : pass.length < 8 ? MSG.weak_password : pass !== pass2 ? 'The two passwords are not the same. Type them again.' : kind === 'invite' && !$('cTerms').checked ? 'Tick the box to accept the note below.' : '';
+    if (bad) { show(kind, bad); return; }
+    S.busy = true; S.msg = ''; draw();
+    if (kind === 'newpass') { token().then(function (t) { return req('/auth/v1/user', { password: pass }, t, 'PUT'); }).then(function (x) { pass = pass2 = '';
+      if (!x.ok) { show(kind, say(x)); return; } if (x.data && x.data.id && S.session) { S.session.user = x.data.id; S.session.email = x.data.email; keep(S.session); } enter(); }); return; }
+    team({ action: 'accept', token: I.token, name: S.name, password: pass }, CLOUD.key).then(function (x) {
+      if (!x.ok) { pass = pass2 = ''; show(kind, tsay(x)); return; }
+      return req('/auth/v1/token?grant_type=password', { email: I.email, password: pass }).then(function (y) { pass = pass2 = ''; S.inv = null;
+        if (y.ok && take(y.data)) return enter(); show('signin', 'You joined ' + (I.workspace || 'the workspace') + '. Sign in with your new password.', true); });
+    });
+  }
+  /* what the address of the page asks for: an invitation (#invite=...), or the link of a forgotten password */
+  function route() {
+    var hp = {}; (location.hash || '').replace(/^#/, '').split('&').forEach(function (kv) { var i = kv.indexOf('='); if (i > 0) { try { hp[kv.slice(0, i)] = decodeURIComponent(kv.slice(i + 1)); } catch (e) {} } });
+    if (!hp.invite && !hp.access_token && !hp.error_description) return false;
+    try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}   /* the token does not stay in the address bar */
+    if (hp.type === 'recovery' && hp.access_token) { keep({ at: hp.access_token, rt: hp.refresh_token || '', exp: Date.now() + (+hp.expires_in || 3600) * 1000, user: '', email: '' }); show('newpass'); return true; }
+    if (hp.error_description) { show('signin', String(hp.error_description).replace(/\+/g, ' ').slice(0, 200)); return true; }
+    if (!hp.invite) return false;
+    show('loading', 'Opening your invitation…');
+    team({ action: 'open', token: hp.invite }, CLOUD.key).then(function (x) {
+      if (!x.ok || !x.data || !x.data.email) { if (S.session) enter(); else show('signin', tsay(x)); return; }
+      S.inv = x.data; S.inv.token = hp.invite; S.email = x.data.email;
+      if (!x.data.has_account) { keep(null); show('invite'); return; }
+      if (S.session && S.session.email === x.data.email) enter(); else { keep(null); show('signin', 'You already have an account: sign in to join ' + x.data.workspace + '.', true); }
+    });
+    return true;
+  }
   function submit(kind) {
     if (S.busy) return;
+    if (kind === 'forgot' || kind === 'newpass' || kind === 'invite') { more(kind); return; }
     var email = ($('cEmail').value || '').trim().toLowerCase(), pass = $('cPass').value || '', pass2 = $('cPass2') ? $('cPass2').value || '' : '', name = $('cName') ? ($('cName').value || '').trim() : '', up = kind === 'signup';
     S.email = email; S.name = name;
     var bad = !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) ? 'Enter your company e-mail address.' :
@@ -257,13 +312,15 @@
   document.addEventListener('submit', function (ev) { if (ev.target && ev.target.id === 'f') { ev.preventDefault(); submit(ev.target.getAttribute('data-kind')); } });
   document.addEventListener('click', function (ev) {
     var b = ev.target.closest && ev.target.closest('[data-go]'); if (!b) return; var go = b.getAttribute('data-go');
-    if (go === 'signin' || go === 'signup') { S.email = $('cEmail') ? $('cEmail').value.trim() : S.email; show(go); }
+    if (go === 'signin' || go === 'signup' || go === 'forgot') { S.email = $('cEmail') ? $('cEmail').value.trim() : S.email; if (go === 'signin' && S.inv && !S.inv.has_account) S.inv = null; show(go); }
     else if (go === 'check') { S.busy = true; draw(); enter().then(function () { if (S.view === 'waiting') show('waiting', 'Not approved yet.'); }); }
     else if (go === 'signout') { var s = S.session; if (s) req('/auth/v1/logout', {}, s.at); keep(null); show('signin'); }
   });
   if (!CLOUD.url || !CLOUD.key) { show('failed', 'This page was not built: run web-edition\\build.ps1.'); return; }
   var s0 = null; try { s0 = JSON.parse(localStorage.getItem(CSESS) || 'null'); } catch (e) {}
   S.session = s0 && s0.at && s0.rt ? s0 : null;
+  window.addEventListener('hashchange', route);
+  if (route()) return;
   if (S.session) enter(); else show('signin');
 })();
 </script>
